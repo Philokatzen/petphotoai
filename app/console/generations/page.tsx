@@ -69,6 +69,13 @@ export default async function GenerationsPage({
               const photoPackName = job.photoPack?.nameCn || "未知风格";
               const resultUrls = job.assets.map((a) => a.url);
 
+              // 安全地提取错误信息
+              const result = job.result as unknown;
+              const errorMsg =
+                result && typeof result === "object" && !Array.isArray(result) && "error" in result
+                  ? String((result as { error: unknown }).error)
+                  : undefined;
+
               return (
                 <Card key={job.id}>
                   <CardHeader>
@@ -133,9 +140,7 @@ export default async function GenerationsPage({
                       <div className="text-center py-8 text-muted-foreground">
                         {job.status === "PROCESSING" || job.status === "PENDING"
                           ? "AI 正在创作中，请稍候..."
-                          : job.result?.error
-                          ? job.result.error
-                          : "生成失败，请重试"}
+                          : errorMsg || "生成失败，请重试"}
                       </div>
                     )}
                   </CardContent>
