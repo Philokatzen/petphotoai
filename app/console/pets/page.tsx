@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PawPrint, Plus, Sparkles, ImageIcon } from "lucide-react";
 import { ConsoleLayout } from "@/components/console/console-layout";
 import { ConsoleNavHider } from "@/components/console/console-nav-hider";
+import { getPetTypeLabel } from "@/lib/utils/pet-type";
 
 export default async function PetsPage() {
   const session = await getServerSession(authOptions);
@@ -132,7 +133,8 @@ export default async function PetsPage() {
                   <CardHeader>
                     <CardTitle>{pet.name}</CardTitle>
                     <CardDescription>
-                      {pet.breed || pet.type === 'cat' ? '猫咪' : pet.type === 'dog' ? '狗狗' : '宠物'}
+                      {getPetTypeLabel(pet.type)}
+                      {pet.breed && ` · ${pet.breed}`}
                       {pet.coatColor && ` · ${pet.coatColor}`}
                     </CardDescription>
                   </CardHeader>

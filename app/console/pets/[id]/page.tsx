@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { PawPrint, ImageIcon, Sparkles, Settings, ChevronRight, Calendar, Palette } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { getPetTypeLabel } from "@/lib/utils/pet-type";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -157,7 +158,7 @@ export default async function PetDetailPage({ params }: PageProps) {
                         <div>
                           <label className="text-xs text-muted-foreground">品种</label>
                           <p className="font-medium">
-                            {pet.type === 'cat' ? '猫咪' : pet.type === 'dog' ? '狗狗' : '宠物'}
+                            {getPetTypeLabel(pet.type)}
                             {pet.breed && ` · ${pet.breed}`}
                           </p>
                         </div>
