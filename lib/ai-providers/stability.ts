@@ -16,7 +16,7 @@ export class StabilityAIProvider extends AIProvider {
   private apiKey: string;
   private baseURL = 'https://api.stability.ai/v1';
 
-  constructor(apiKey: string, retryConfig?: Parameters<typeof AIProvider.prototype.constructor>[1]) {
+  constructor(apiKey: string, retryConfig?: Partial<import('./types').RetryConfig>) {
     super(retryConfig);
     this.apiKey = apiKey;
   }
@@ -184,7 +184,7 @@ export class StabilityAIProvider extends AIProvider {
     // 准备图片数据
     const imageBuffer = await this.fetchImageBuffer(referenceImage);
     const formData = new FormData();
-    formData.append('init_image', new Blob([imageBuffer]), 'image.png');
+    formData.append('init_image', new Blob([new Uint8Array(imageBuffer)]), 'image.png');
     formData.append('init_image_mode', 'IMAGE_STRENGTH');
     formData.append('image_strength', imageStrength.toString());
     formData.append('text_prompts[0][text]', prompt);

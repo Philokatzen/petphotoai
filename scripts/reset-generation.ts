@@ -4,10 +4,10 @@ const prisma = new PrismaClient();
 
 async function resetFailedGenerations() {
   try {
-    // 将状态为 PROCESSING 且创建时间超过 5 分钟的记录标记为失败
+    // 将状态为 PROCESSING 且创建时间超过 5 分钟的任务标记为失败
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
 
-    const result = await prisma.photoGeneration.updateMany({
+    const result = await prisma.job.updateMany({
       where: {
         status: 'PROCESSING',
         createdAt: {
@@ -19,7 +19,7 @@ async function resetFailedGenerations() {
       },
     });
 
-    console.log(`✅ 已重置 ${result.count} 个失败的生成记录`);
+    console.log(`✅ 已重置 ${result.count} 个失败的任务`);
   } catch (error) {
     console.error('重置失败:', error);
   } finally {

@@ -100,13 +100,13 @@ export abstract class AIProvider {
   /**
    * 生成宠物图片
    * @param providerModelId - 训练好的模型 ID
-   * @param photoPack - 主题包（可选）
+   * @param referenceImages - 参考���片数组（可选）
    * @param params - 生成参数
    * @returns 生成结果
    */
   abstract generatePetImages(
     providerModelId: string,
-    photoPack?: string,
+    referenceImages?: string[],
     params?: GenerationParams
   ): Promise<GenerationResult>;
 

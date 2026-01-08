@@ -1,15 +1,22 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, SpeciesSupport } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-const PHOTO_PACKS = [
+const PHOTO_PACKS: Array<{
+  nameCn: string;
+  descriptionCn: string;
+  basePrompt: string;
+  negativePrompt: string;
+  defaultNumImages: number;
+  speciesSupport: SpeciesSupport;
+}> = [
   {
     nameCn: '证件照',
     descriptionCn: '专业证件照，纯净背景，适合正式场合',
     basePrompt: 'professional ID photo portrait, clean solid background, studio lighting, neutral expression, front view',
     negativePrompt: 'blurry, low quality, cartoon, illustration, sketch',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
   {
     nameCn: '漫画风',
@@ -17,7 +24,7 @@ const PHOTO_PACKS = [
     basePrompt: 'comic book art style, vibrant colors, bold outlines, pop art aesthetic, cel shading',
     negativePrompt: 'realistic, photograph, 3d render',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
   {
     nameCn: '雪景',
@@ -25,7 +32,7 @@ const PHOTO_PACKS = [
     basePrompt: 'beautiful winter scene with falling snow, pet wearing cute scarf and hat, magical atmosphere, snowflakes, cold weather',
     negativePrompt: 'summer, hot, desert, beach',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
   {
     nameCn: '太空',
@@ -33,7 +40,7 @@ const PHOTO_PACKS = [
     basePrompt: 'pet in outer space, cosmic background with stars and nebula, astronaut suit, sci-fi aesthetic, futuristic, galaxy',
     negativePrompt: 'earth, natural, ordinary',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
   {
     nameCn: '油画',
@@ -41,7 +48,7 @@ const PHOTO_PACKS = [
     basePrompt: 'classical oil painting style, rich textures, artistic masterpiece, museum quality, brush strokes visible, chiaroscuro lighting',
     negativePrompt: 'digital, photograph, modern',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
   {
     nameCn: '国风',
@@ -49,7 +56,7 @@ const PHOTO_PACKS = [
     basePrompt: 'traditional Chinese ink wash painting style, elegant brushstrokes, minimalist aesthetic, watercolor texture, artistic',
     negativePrompt: 'realistic, photograph, 3d',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
   {
     nameCn: '赛博朋克',
@@ -57,7 +64,7 @@ const PHOTO_PACKS = [
     basePrompt: 'cyberpunk aesthetic, neon lights, futuristic city background, high tech vibe, holographic elements, dark atmosphere',
     negativePrompt: 'natural, daylight, traditional',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
   {
     nameCn: '海滩',
@@ -65,7 +72,7 @@ const PHOTO_PACKS = [
     basePrompt: 'sunny beach scene, ocean waves, palm trees, tropical paradise, bright and colorful, blue sky, sand',
     negativePrompt: 'winter, cold, dark',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
   {
     nameCn: '森林',
@@ -73,7 +80,7 @@ const PHOTO_PACKS = [
     basePrompt: 'enchanted forest setting, magical woodland, dappled sunlight through trees, fairy tale atmosphere, moss and ferns',
     negativePrompt: 'urban, city, desert',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
   {
     nameCn: '万圣节',
@@ -81,7 +88,7 @@ const PHOTO_PACKS = [
     basePrompt: 'spooky Halloween theme, pumpkins, autumn leaves, playful costume, fun and festive, orange and black colors',
     negativePrompt: 'bright, cheerful, summer',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
   {
     nameCn: '圣诞',
@@ -89,7 +96,7 @@ const PHOTO_PACKS = [
     basePrompt: 'festive Christmas scene, holiday decorations, snow, Christmas tree, ornaments, cozy warm atmosphere, red and green colors',
     negativePrompt: 'summer, beach, hot',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
   {
     nameCn: '婚礼',
@@ -97,7 +104,7 @@ const PHOTO_PACKS = [
     basePrompt: 'elegant wedding theme, formal attire with flowers, beautiful bouquet, romantic atmosphere, soft lighting, dreamy',
     negativePrompt: 'casual, rugged, outdoor',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
   {
     nameCn: '超级英雄',
@@ -105,7 +112,7 @@ const PHOTO_PACKS = [
     basePrompt: 'epic superhero style, dynamic action pose, powerful stance, comic book hero aesthetic, cape fluttering, dramatic angle',
     negativePrompt: 'ordinary, weak, casual',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
   {
     nameCn: '文艺复兴',
@@ -113,7 +120,7 @@ const PHOTO_PACKS = [
     basePrompt: 'Renaissance portrait style, classical art, ornate background, period clothing, dramatic lighting, oil painting texture',
     negativePrompt: 'modern, contemporary, digital',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
   {
     nameCn: '水彩',
@@ -121,7 +128,7 @@ const PHOTO_PACKS = [
     basePrompt: 'delicate watercolor painting, soft pastel colors, artistic and dreamy, gentle brush strokes, flowing colors',
     negativePrompt: 'bold, dark, heavy',
     defaultNumImages: 4,
-    speciesSupport: 'BOTH',
+    speciesSupport: SpeciesSupport.BOTH,
   },
 ];
 

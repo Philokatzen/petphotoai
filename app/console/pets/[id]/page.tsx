@@ -44,6 +44,9 @@ export default async function PetDetailPage({ params }: PageProps) {
         where: { type: "GENERATE" },
         orderBy: { createdAt: "desc" },
         take: 10,
+        include: {
+          photoPack: true,
+        },
       },
     },
   });

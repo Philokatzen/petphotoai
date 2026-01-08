@@ -235,8 +235,8 @@ export class JobService {
     jobId: string,
     aiModelId: string,
     photoPack: any,
-    referenceImages: string[],
-    generationParams: any,
+    referenceImages: string[] = [],
+    generationParams: any = {},
     userId: string
   ) {
     const generationCost = 5;
