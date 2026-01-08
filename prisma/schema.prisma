@@ -1,0 +1,300 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户模型
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  pets          Pet[]
+  aiModels      AIModel[]
+  jobs          Job[]
+  assets        Asset[]
+  orders        Order[]
+  credits       Credit[]
+  subscriptions Subscription[]
+}
+
+// NextAuth Account
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+// NextAuth Session
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// NextAuth VerificationToken
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// 宠物模型
+model Pet {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name      String             // 宠物名字
+  type      PetType            // 宠物类型：cat/dog/other
+  breed     String?            // 品种
+  coatColor String?            @map("coat_color")   // 毛色
+  gender    String?            // 性别（可选）
+  birthday  DateTime?          // 生日（可选）
+  notes     String?            // 备注
+
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt
+
+  aiModels  AIModel[]
+  jobs      Job[]
+  assets    Asset[]
+
+  @@index([userId])
+  @@map("pets")
+}
+
+enum PetType {
+  CAT    // 猫
+  DOG    // 狗
+  OTHER  // 其他
+}
+
+// AI 模型
+model AIModel {
+  id                String          @id @default(cuid())
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  petId             String
+  pet               Pet             @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  name              String          // 模型名称
+  status            AIModelStatus    @default(PENDING)
+  provider          String          // AI 提供商：stability, replicate 等
+  providerModelId   String?         @map("provider_model_id")  // 提供商的模型 ID
+
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt
+
+  jobs              Job[]
+  assets            Asset[]
+
+  @@index([userId, petId])
+  @@map("ai_models")
+}
+
+enum AIModelStatus {
+  PENDING   // 等待中
+  TRAINING  // 训练中
+  READY     // 就绪
+  FAILED    // 失败
+}
+
+// 任务（训练/生成）
+model Job {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  petId       String
+  pet         Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  aiModelId   String?   @map("ai_model_id")
+  aiModel     AIModel?  @relation(fields: [aiModelId], references: [id], onDelete: SetNull)
+
+  type        JobType
+  status      JobStatus @default(PENDING)
+
+  inputParams Json?     @map("input_params")  // 输入参数（JSON）
+  result      Json?                           // 结果（JSON）
+  photoPackId String?   @map("photo_pack_id")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  finishedAt  DateTime? @map("finished_at")
+
+  assets      Asset[]
+  photoPack   PhotoPack? @relation("JobPhotoPack", fields: [photoPackId], references: [id], onDelete: SetNull)
+
+  @@index([userId, petId, aiModelId])
+  @@index([status])
+  @@map("jobs")
+}
+
+enum JobType {
+  TRAIN    // 训练
+  GENERATE // 生成
+}
+
+enum JobStatus {
+  PENDING    // 等待中
+  PROCESSING // 处理中
+  COMPLETED  // 已完成
+  FAILED     // 失败
+}
+
+// 资源（图片/视频）
+model Asset {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  petId        String?
+  pet          Pet?      @relation(fields: [petId], references: [id], onDelete: SetNull)
+  aiModelId    String?   @map("ai_model_id")
+  aiModel      AIModel?  @relation(fields: [aiModelId], references: [id], onDelete: SetNull)
+  jobId        String?
+  job          Job?      @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  type         AssetType
+  url          String
+  thumbnailUrl String?   @map("thumbnail_url")
+
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@index([userId, petId, aiModelId, jobId])
+  @@map("assets")
+}
+
+enum AssetType {
+  IMAGE  // 图片
+  VIDEO  // 视频
+}
+
+// 主题包
+model PhotoPack {
+  id                String           @id @default(cuid())
+  nameCn            String           @map("name_cn")         // 中文名称
+  descriptionCn     String           @map("description_cn")  // 中文描述
+  basePrompt        String           @map("base_prompt")     // 基础提示词
+  negativePrompt    String?          @map("negative_prompt") // 负面提示词
+  defaultNumImages  Int              @default(4) @map("default_num_images") // 默认生成图片数量
+  coverUrl          String?          @map("cover_url")      // 封面图
+  speciesSupport    SpeciesSupport   @default(BOTH) @map("species_support") // 支持的物种
+
+  createdAt         DateTime         @default(now()) @map("created_at")
+
+  jobs              Job[]            @relation("JobPhotoPack")
+
+  @@map("photo_packs")
+}
+
+enum SpeciesSupport {
+  CAT  // 仅猫
+  DOG  // 仅狗
+  BOTH // 猫狗都支持
+}
+
+// 积分记录
+model Credit {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  amount    Int      // 积分数量（正数为充值，负数为消费）
+  balance   Int      // 余额
+  reason    String   // 原因说明
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// 订单
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  amount          Int         // 金额（分）
+  currency        String      @default("CNY")
+  status          OrderStatus @default(PENDING)
+
+  stripePaymentIntentId String?
+  stripeCustomerId      String?
+
+  creditsAmount    Int?        // 购买的积分数量
+  metadata         Json?       // 元数据（支付方式、套餐等）
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([userId])
+}
+
+enum OrderStatus {
+  PENDING   // 待支付
+  COMPLETED // 已完成
+  FAILED    // 失败
+  REFUNDED  // 已退款
+}
+
+// 订阅
+model Subscription {
+  id              String           @id @default(cuid())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  plan            SubscriptionPlan
+  status          SubscriptionStatus @default(ACTIVE)
+
+  stripeSubscriptionId String?
+  stripeCustomerId     String?
+
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+
+  creditsPerMonth   Int // 每月积分额度
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+enum SubscriptionPlan {
+  BASIC    // 基础版
+  PRO      // 专业版
+  UNLIMITED // 无限版
+}
+
+enum SubscriptionStatus {
+  ACTIVE    // 活跃
+  CANCELED  // 已取消
+  EXPIRED   // 已过期
+  PAST_DUE  // 逾期
+}
