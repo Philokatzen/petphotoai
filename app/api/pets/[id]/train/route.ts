@@ -69,11 +69,18 @@ export async function POST(request: Request, { params }: RouteParams) {
       });
     }
 
-    // 检查是否已有训练完成的模型
+    // 检查是否已有��练完成的模型
     const completedModel = await prisma.aIModel.findFirst({
       where: {
         petId,
         status: "READY",
+      },
+      include: {
+        jobs: {
+          where: { type: "TRAIN" },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
       },
     });
 
